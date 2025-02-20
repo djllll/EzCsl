@@ -24,13 +24,13 @@ typedef unsigned char uint8_t;
 
 
 /* Ez Function ,Donnot Modify */
-extern void ezport_send_str(char *str, uint16_t len);
-extern void ezport_delay(uint16_t ms);
-extern void ezport_receive_a_char(char c);
-extern void ezport_rtos_mutex_lock(void);
-extern void ezport_rtos_mutex_unlock(void);
-extern void ezport_custom_init(void);
-extern void ezport_custom_deinit(void);
+void ezport_send_str(char *str, uint16_t len);
+void ezport_delay(uint16_t ms);
+void ezport_receive_a_char(char c);
+void ezport_rtos_mutex_lock(void);
+void ezport_rtos_mutex_unlock(void);
+void ezport_custom_init(void);
+void ezport_custom_deinit(void);
 
 
 /* Ez Configuration , Porting ******************/

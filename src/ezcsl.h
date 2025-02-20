@@ -70,20 +70,18 @@ typedef struct{
     uint16_t contentlen;
 }modem_file_t;
 
-extern void ezcsl_modem_set(const char *modem_prefix,modem_rev_func_t (*cb_func)(modem_file_t *));
+void ezcsl_modem_set(const char *modem_prefix,modem_rev_func_t (*cb_func)(modem_file_t *));
 #endif
 
-extern void ezcsl_init(const char *prefix ,const char *welcome,const char *sudo_psw);
-extern void ezcsl_deinit(void); 
-extern uint8_t ezcsl_tick(void);
-extern void ezcsl_reset_prefix(void);
-
-extern ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main,const char *describe ,uint8_t need_sudo, void (*callback)(uint16_t,ez_param_t*));
-extern ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_sub, const char *describe, const char* para_desc);
-extern void ezport_send_str(char *str, uint16_t len);
-extern void ezcsl_printf(const char *fmt, ...);
-extern uint8_t ezcsl_break_signal(void);
- 
+void ezcsl_init(const char *prefix ,const char *welcome,const char *sudo_psw);
+void ezcsl_deinit(void); 
+void ezcsl_reset_prefix(void);
+void ezport_send_str(char *str, uint16_t len);
+void ezcsl_printf(const char *fmt, ...);
+uint8_t ezcsl_tick(void);
+uint8_t ezcsl_break_signal(void);
+ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main,const char *describe ,uint8_t need_sudo, void (*callback)(uint16_t,ez_param_t*));
+ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_sub, const char *describe, const char* para_desc);
 
 #define MOVE_CURSOR_ABS(n)      "\033["#n"G"
 #define ERASE_TO_END()          "\033[K"
@@ -209,10 +207,10 @@ typedef struct {
     uint8_t tail;    
 } ezrb_t;  
 
-extern ezrb_t *ezrb_create(uint8_t len);
-extern rb_sta_t ezrb_push(ezrb_t *cb,RB_DATA_T dat);
-extern rb_sta_t ezrb_pop(ezrb_t *cb,RB_DATA_T *dat);
-extern void ezrb_destroy(ezrb_t *cb);
+ezrb_t *ezrb_create(uint8_t len);
+rb_sta_t ezrb_push(ezrb_t *cb,RB_DATA_T dat);
+rb_sta_t ezrb_pop(ezrb_t *cb,RB_DATA_T *dat);
+void ezrb_destroy(ezrb_t *cb);
 
 /* Ez String */
 #define EZSTR_OK 0
@@ -221,14 +219,14 @@ extern void ezrb_destroy(ezrb_t *cb);
 #define ezstr_ret_t char
 #define ezstr_size_t int
 
-extern ezstr_ret_t estrcat_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
-extern ezstr_ret_t estrcatc_s(char *_Dst, ezstr_size_t _DstSize, char _Src);
-extern ezstr_ret_t estrcpy_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
-extern ezstr_ret_t estrlen_s(const char *_Str,ezstr_size_t _Size);
-extern ezstr_size_t estrlen(const char *_Str);
-extern ezstr_ret_t estrcmp(const char* _Str1,const char* _Str2);
-extern ezstr_ret_t estrncmp(const char *_Str1, const char *_Str2, ezstr_size_t _Size);
-extern char* estrtokc(char *_Str, char _Deli);
+ezstr_ret_t estrcat_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
+ezstr_ret_t estrcatc_s(char *_Dst, ezstr_size_t _DstSize, char _Src);
+ezstr_ret_t estrcpy_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
+ezstr_ret_t estrlen_s(const char *_Str,ezstr_size_t _Size);
+ezstr_size_t estrlen(const char *_Str);
+ezstr_ret_t estrcmp(const char* _Str1,const char* _Str2);
+ezstr_ret_t estrncmp(const char *_Str1, const char *_Str2, ezstr_size_t _Size);
+char* estrtokc(char *_Str, char _Deli);
 
 
 
