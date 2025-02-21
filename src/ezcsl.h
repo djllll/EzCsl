@@ -34,7 +34,7 @@ typedef struct CmdUnitObj{
     const char *describe;
     void (*callback)(uint16_t ,ez_param_t*);
     struct CmdUnitObj *next;
-    uint8_t need_sudo;
+    uint8_t need_su;
 }ez_cmd_unit_t;
 
 typedef struct CmdObj{
@@ -73,14 +73,15 @@ typedef struct{
 void ezcsl_modem_set(const char *modem_prefix,modem_rev_func_t (*cb_func)(modem_file_t *));
 #endif
 
-void ezcsl_init(const char *prefix ,const char *welcome,const char *sudo_psw);
+void ezcsl_init(const char *prefix ,const char *welcome,const char *su_psw);
 void ezcsl_deinit(void); 
 void ezcsl_reset_prefix(void);
 void ezport_send_str(char *str, uint16_t len);
 void ezcsl_printf(const char *fmt, ...);
+void ezcsl_is_su(void);
 uint8_t ezcsl_tick(void);
 uint8_t ezcsl_break_signal(void);
-ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main,const char *describe ,uint8_t need_sudo, void (*callback)(uint16_t,ez_param_t*));
+ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main,const char *describe ,uint8_t need_su, void (*callback)(uint16_t,ez_param_t*));
 ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_sub, const char *describe, const char* para_desc);
 
 #define MOVE_CURSOR_ABS(n)      "\033["#n"G"

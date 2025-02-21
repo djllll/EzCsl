@@ -56,9 +56,10 @@ static struct EzCslHandleStruct {
     const char *modem_prefix;
     modem_rev_func_t (*modem_cb)(modem_file_t *); // filename,filesize,buf,buflen
 #endif
-    /* sudo */
-    const char *sudo_psw;
-    uint8_t sudo_checked;
+
+    /* su */
+    const char *su_psw;
+    uint8_t su_checked;
     uint8_t psw_inputing;
 
     /* occupy */
@@ -169,9 +170,9 @@ void ezport_receive_a_char(char c)
  *
  * @param prefix prefix of shell
  * @param welcome
- * @param sudo_psw password of sudo, NULL = no sudo
+ * @param su_psw password of su, NULL = no su
  */
-void ezcsl_init(const char *prefix, const char *welcome, const char *sudo_psw)
+void ezcsl_init(const char *prefix, const char *welcome, const char *su_psw)
 {
     ezport_custom_init();
 
@@ -191,9 +192,9 @@ void ezcsl_init(const char *prefix, const char *welcome, const char *sudo_psw)
         ezhdl.hist_buf[i] = 0;
     }
 
-    ezhdl.sudo_psw = sudo_psw;
+    ezhdl.su_psw = su_psw;
     ezhdl.psw_inputing = 0;
-    ezhdl.sudo_checked = 0;
+    ezhdl.su_checked = 0;
 
     ezhdl.rb = ezrb_create(CSL_BUF_LEN / 2);
 
@@ -358,9 +359,9 @@ uint8_t ezcsl_tick(void)
                     buf_to_history();
                     ezcsl_submit();
                 } else {
-                    if (estrcmp(ezhdl.sudo_psw,ezhdl.buf) == 0) {
+                    if (estrcmp(ezhdl.su_psw,ezhdl.buf) == 0) {
                         /* password success */
-                        ezhdl.sudo_checked = 1;
+                        ezhdl.su_checked = 1;
                         ezhdl.psw_inputing = 0;
                         /* submit again, TODO it looks not beautiful */
                         last_history_to_buf(); 
@@ -492,8 +493,8 @@ static void ezcsl_submit(void)
     while (cmd_p != NULL) {
         if (estrcmp(cmd_p->unit->title_main, maintitle) == 0) {
             match_ok_flag = 1;
-            if (cmd_p->unit->need_sudo && !ezhdl.sudo_checked && ezhdl.sudo_psw != NULL) {
-                /* query sudo password */
+            if (cmd_p->unit->need_su && !ezhdl.su_checked && ezhdl.su_psw != NULL) {
+                /* query su password */
                 ezcsl_reset_empty();
                 ezcsl_printf(TIP_PSW_INPUT);
                 ezhdl.psw_inputing = 1;
@@ -641,11 +642,11 @@ static void ezcsl_tabcomplete(void)
  * 
  * @param title_main 
  * @param describe 
- * @param need_sudo EZ_NSUDO or EZ_SUDO
+ * @param need_su EZ_NSUDO or EZ_SUDO
  * @param callback 
  * @return ez_cmd_unit_t* 
  */
-ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describe, uint8_t need_sudo, void (*callback)(uint16_t, ez_param_t *))
+ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describe, uint8_t need_su, void (*callback)(uint16_t, ez_param_t *))
 {
     if (estrlen(title_main) == 0 || estrlen(title_main) >= 10 || callback == NULL) {
         return NULL;
@@ -664,7 +665,7 @@ ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describ
     p_add->next = NULL;
     p_add->title_main = title_main;
     p_add->callback = callback;
-    p_add->need_sudo = need_sudo;
+    p_add->need_su = need_su;
 
     if (cmd_unit_head == NULL) {
         cmd_unit_head = p_add;
@@ -729,6 +730,15 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
  */
 uint8_t ezcsl_break_signal(void){
     return !ezhdl.csl_occupied;
+}
+
+
+/**
+ * @brief 
+ * 
+ */
+void ezcsl_is_su(void){
+    return ezhdl.su_checked;
 }
 
 /**
