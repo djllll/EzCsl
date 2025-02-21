@@ -17,7 +17,7 @@ extern "C" {
 #define EZ_YMODEM_1K   0x01
 
 
-/* Ez Type ,Porting ******************/
+/* Ez Type Port ******************/
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 typedef unsigned char uint8_t;
@@ -33,7 +33,7 @@ void ezport_custom_init(void);
 void ezport_custom_deinit(void);
 
 
-/* Ez Configuration , Porting ******************/
+/* Ez Configuration Port ******************/
 #define CSL_BUF_LEN     50 // console buf len (include prefix)
 #define HISTORY_BUF_LEN 40 // history record
 #define PRINT_BUF_LEN   150
