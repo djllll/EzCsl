@@ -68,15 +68,7 @@ static struct EzCslHandleStruct {
 
 
 /* ez console port function */
-void ezport_receive_a_char(char c);
-
-void ezcsl_init(const char *prefix, const char *welcome, const char *sudo_psw);
-void ezcsl_deinit(void);
-uint8_t ezcsl_tick(void);
-void ezcsl_reset_prefix(void);
-void ezcsl_printf(const char *fmt, ...);
 #if USE_EZ_MODEM != 0
-void ezcsl_modem_set(const char *modem_prefix, modem_rev_func_t (*cb_func)(modem_file_t *));
 static ez_sta_t modem_start(void);
 static uint16_t crc16_modem(uint8_t *data, uint16_t length);
 static void modem_reply(uint8_t reply);
@@ -92,9 +84,6 @@ static void last_history_to_buf(void);
 static void next_history_to_buf(void);
 static ez_cmd_t *cmd_head = NULL;
 static ez_cmd_unit_t *cmd_unit_head = NULL;
-ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describe, uint8_t need_sudo, void (*callback)(uint16_t, ez_param_t *));
-ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_sub, const char *describe, const char *para_desc);
-uint8_t ezcsl_break_signal(void);
 
 /* ez inner cmd */
 static void ezcsl_cmd_help_callback(uint16_t id, ez_param_t *para);
@@ -1034,12 +1023,6 @@ static ez_sta_t modem_start(void)
 #endif /* USE_EZ_MODEM */
 
 
-/* ****************** ezrb ************* */
-ezrb_t *ezrb_create(uint8_t len);
-rb_sta_t ezrb_push(ezrb_t *cb, RB_DATA_T dat);
-rb_sta_t ezrb_pop(ezrb_t *cb, RB_DATA_T *dat);
-void ezrb_destroy(ezrb_t *cb);
-
 /**
  * create a ringbuffer
  */
@@ -1124,15 +1107,6 @@ void ezrb_destroy(ezrb_t *rb)
 #define EZSTR_OVERFLOW(s, lmt) \
     if (++s >= lmt)            \
         return EZSTR_ERR;
-
-ezstr_ret_t estrcat_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
-ezstr_ret_t estrcatc_s(char *_Dst, ezstr_size_t _DstSize, char _Src);
-ezstr_ret_t estrcpy_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
-ezstr_ret_t estrlen_s(const char *_Str, ezstr_size_t _Size);
-ezstr_size_t estrlen(const char *_Str);
-ezstr_ret_t estrcmp(const char *_Str1, const char *_Str2);
-ezstr_ret_t estrncmp(const char *_Str1, const char *_Str2, ezstr_size_t _Size);
-char *estrtokc(char *_Str, char _Deli);
 
 
 ezstr_ret_t estrcat_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src)
