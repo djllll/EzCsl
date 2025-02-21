@@ -17,7 +17,7 @@
 
 #define TIP_MAIN_CMD_DESC_LIST COLOR_GREEN("Main Command & Description List")
 #define TIP_SUB_CMD_DESC_LIST  COLOR_GREEN("Sub Command & Description List")
-#define TIP_SPLIT_LINE         COLOR_GREEN("=========================")
+#define TIP_SPLIT_LINE         COLOR_GREEN("-------------------------")
 #define TIP_INCORRECT_PSW      COLOR_RED("\r\nIncorrect Password! Try again.\r\n")
 #define TIP_PSW_INPUT          "Password :"
 

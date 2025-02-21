@@ -186,6 +186,27 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
     }
 #endif
 
+
+#if (LOG_DEFINE & LOG_LEVEL_PRT)
+#define EZ_PRT_PROGRESS(txt, prg)                                                      \
+    do {                                                                               \
+        ezcsl_printf(SAVE_CURSOR_POS() "%s[", txt);                                    \
+        for (uint16_t i_prg = 0; i_prg < 30; i_prg++) {                                \
+            ezcsl_printf("%c", i_prg < (prg) * 30 / 100 ? '=' : ' ');                  \
+        }                                                                              \
+        if ((prg) >= 100) {                                                            \
+            ezcsl_printf("][100%%]" RESTORE_CURSOR_POS() "\r\n");                      \
+        } else {                                                                       \
+            ezcsl_printf("]%c[%d%%]" RESTORE_CURSOR_POS(), "\\|/-"[(prg) % 3], (prg)); \
+        }                                                                              \
+    } while (0)
+#else
+#define EZ_PRT_PROGRESS(txt, prg) \
+    {                             \
+        ;                         \
+    }
+#endif
+
 #define EZ_NSUDO 0
 #define EZ_SUDO  1
 

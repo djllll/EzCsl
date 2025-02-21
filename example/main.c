@@ -27,6 +27,7 @@
 #define ECHO_ONE_ID  1
 #define ECHO_MUL_ID  2
 #define ECHO_TIME_ID 3
+#define ECHO_PROGRESS_ID 4
 
 #define INFO_VERSION_ID 0
 
@@ -53,9 +54,9 @@ void test_cmd_callback(uint16_t id, ez_param_t *para)
 
 /**
  * @brief echo command callback
- * 
- * @param id 
- * @param para 
+ *
+ * @param id
+ * @param para
  */
 void echo_cmd_callback(uint16_t id, ez_param_t *para)
 {
@@ -70,13 +71,23 @@ void echo_cmd_callback(uint16_t id, ez_param_t *para)
         EZ_PRTL("your input :%s f:%f i:%d", EZ_PtoS(para[0]), EZ_PtoF(para[1]), EZ_PtoI(para[2]));
         break;
     case ECHO_TIME_ID: {
-        while(!ezcsl_break_signal()){
+        while (!ezcsl_break_signal()) {
             ezport_delay(1000);
             time_t now_time;
             time(&now_time);
             EZ_PRTL("=> %s", ctime(&now_time));
         }
     } break;
+    case ECHO_PROGRESS_ID:
+        {
+            uint16_t prg= 0;
+            while (!ezcsl_break_signal() && prg<100) {
+                prg++;
+                ezport_delay(100);
+                EZ_PRT_PROGRESS("Progressing Echo: ",prg);
+            }
+        }
+        break;
     default:
         break;
     }
@@ -159,6 +170,7 @@ int main(void)
     ezcsl_cmd_register(echo_unit, ECHO_ONE_ID, "one", "input 'int'", EZ_PARAM_INT);
     ezcsl_cmd_register(echo_unit, ECHO_MUL_ID, "mul", "input 'str,float,int'", EZ_PARAM_STR EZ_PARAM_FLOAT EZ_PARAM_INT);
     ezcsl_cmd_register(echo_unit, ECHO_TIME_ID, "time", "time echo", "");
+    ezcsl_cmd_register(echo_unit, ECHO_PROGRESS_ID, "prg", "prg echo", "");
 
     ez_cmd_unit_t *info_unit = ezcsl_cmd_unit_create("info", "software info", EZ_SUDO, info_cmd_callback);
     ezcsl_cmd_register(info_unit, INFO_VERSION_ID, "version", "", EZ_PARAM_NONE);
