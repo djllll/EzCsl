@@ -108,10 +108,6 @@ The example can work on Windows.
 3. `gcc ./example/*.c ./src/*.c -Iexample -Isrc -lws2_32 -lpthread -DCMD_MODE -o example`
 4. Run `example(.exe)` in a terminal with ANSI support (like VSCode terminal).
 
-## How to update ezcsl
-|version|update|
-| --- | --- |
-|v1.1.0 -> v1.x.x|replace `ezcsl.c` and `ezcsl.h`|
 
 ## How to make a welcome message
 [Text to ASCII Art Generator](https://patorjk.com/software/taag/)

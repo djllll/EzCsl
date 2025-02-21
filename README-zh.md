@@ -109,10 +109,6 @@ EZ_PRT：等同于printf
 3. `gcc ./example/*.c ./src/*.c -Iexample -Isrc -lws2_32 -lpthread -DCMD_MODE -o example`
 4. 在支持ANSI的终端（如VSCode终端）中运行`example(.exe)`。
 
-## 如何升级
-|版本变化|升级方式|
-| --- | --- |
-|v1.1.0 -> v1.x.x|替换`ezcsl.c`和`ezcsl.h`文件即可|
 
 ## 如何制作欢迎消息
 [Text to ASCII Art Generator](https://patorjk.com/software/taag/)
