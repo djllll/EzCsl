@@ -8,7 +8,7 @@
 extern "C" { 
 #endif 
 
-#define EZCSL_VERSION "v1.2.0"
+#define EZCSL_VERSION "v1.3.0"
 
 
 /* Ez Console */
@@ -34,7 +34,7 @@ typedef struct CmdUnitObj{
     const char *describe;
     void (*callback)(uint16_t ,ez_param_t*);
     struct CmdUnitObj *next;
-    uint8_t need_su;
+    uint8_t need_root;
 }ez_cmd_unit_t;
 
 typedef struct CmdObj{
@@ -70,20 +70,19 @@ typedef struct{
     uint16_t contentlen;
 }modem_file_t;
 
-extern void ezcsl_modem_set(const char *modem_prefix,modem_rev_func_t (*cb_func)(modem_file_t *));
+void ezcsl_modem_set(const char *modem_prefix,modem_rev_func_t (*cb_func)(modem_file_t *));
 #endif
 
-extern void ezcsl_init(const char *prefix ,const char *welcome,const char *su_psw);
-extern void ezcsl_deinit(void); 
-extern uint8_t ezcsl_tick(void);
-extern void ezcsl_reset_prefix(void);
-
-extern ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main,const char *describe ,uint8_t need_su, void (*callback)(uint16_t,ez_param_t*));
-extern ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_sub, const char *describe, const char* para_desc);
-extern void ezport_send_str(char *str, uint16_t len);
-extern void ezcsl_printf(const char *fmt, ...);
-extern uint8_t ezcsl_break_signal(void);
- 
+void ezcsl_init(const char *prefix ,const char *welcome,const char *root_psw);
+void ezcsl_deinit(void); 
+void ezcsl_reset_prefix(void);
+void ezport_send_str(char *str, uint16_t len);
+void ezcsl_printf(const char *fmt, ...);
+uint8_t ezcsl_is_su(void);
+uint8_t ezcsl_tick(void);
+uint8_t ezcsl_break_signal(void);
+ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main,const char *describe ,uint8_t need_root, void (*callback)(uint16_t,ez_param_t*));
+ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_sub, const char *describe, const char* para_desc);
 
 #define MOVE_CURSOR_ABS(n)      "\033["#n"G"
 #define ERASE_TO_END()          "\033[K"
@@ -113,7 +112,7 @@ extern uint8_t ezcsl_break_signal(void);
 #if (LOG_DEFINE & LOG_LEVEL_E)
 #define EZ_LOGE(TAG, format, ...)                                                                \
     do {                                                                                         \
-        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_RED("[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_RED("E[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
         ezcsl_reset_prefix();                                                                    \
     } while (0)
 #else
@@ -127,7 +126,7 @@ extern uint8_t ezcsl_break_signal(void);
 #if (LOG_DEFINE & LOG_LEVEL_I)
 #define EZ_LOGI(TAG, format, ...)                                                                  \
     do {                                                                                           \
-        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_GREEN("[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_GREEN("I[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
         ezcsl_reset_prefix();                                                                      \
     } while (0)
 #else
@@ -141,7 +140,7 @@ extern uint8_t ezcsl_break_signal(void);
 #if (LOG_DEFINE & LOG_LEVEL_D)
 #define EZ_LOGD(TAG, format, ...)                                                                 \
     do {                                                                                          \
-        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_BLUE("[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_BLUE("D[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
         ezcsl_reset_prefix();                                                                     \
     } while (0)
 #else
@@ -154,7 +153,7 @@ extern uint8_t ezcsl_break_signal(void);
 #if (LOG_DEFINE & LOG_LEVEL_V)
 #define EZ_LOGV(TAG, format, ...)                                                   \
     do {                                                                            \
-        ezcsl_printf(MOVE_CURSOR_ABS(0) "[" TAG "] " format "\r\n", ##__VA_ARGS__); \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) "V[" TAG "] " format "\r\n", ##__VA_ARGS__); \
         ezcsl_reset_prefix();                                                       \
     } while (0)
 #else
@@ -188,8 +187,29 @@ extern uint8_t ezcsl_break_signal(void);
     }
 #endif
 
-#define EZ_NSUDO 0
-#define EZ_SUDO  1
+
+#if (LOG_DEFINE & LOG_LEVEL_PRT)
+#define EZ_PRT_PROGRESS(txt, prg)                                                      \
+    do {                                                                               \
+        ezcsl_printf(SAVE_CURSOR_POS() "%s[", txt);                                    \
+        for (uint16_t i_prg = 0; i_prg < 30; i_prg++) {                                \
+            ezcsl_printf("%c", i_prg < (prg) * 30 / 100 ? '=' : ' ');                  \
+        }                                                                              \
+        if ((prg) >= 100) {                                                            \
+            ezcsl_printf("][100%%]" RESTORE_CURSOR_POS() "\r\n");                      \
+        } else {                                                                       \
+            ezcsl_printf("]%c[%d%%]" RESTORE_CURSOR_POS(), "\\|/-"[(prg) % 3], (prg)); \
+        }                                                                              \
+    } while (0)
+#else
+#define EZ_PRT_PROGRESS(txt, prg) \
+    {                             \
+        ;                         \
+    }
+#endif
+
+#define EZ_NROOT 0
+#define EZ_ROOT  1
 
 
 /* Ez Ringbuffer */
@@ -209,10 +229,10 @@ typedef struct {
     uint8_t tail;    
 } ezrb_t;  
 
-extern ezrb_t *ezrb_create(uint8_t len);
-extern rb_sta_t ezrb_push(ezrb_t *cb,RB_DATA_T dat);
-extern rb_sta_t ezrb_pop(ezrb_t *cb,RB_DATA_T *dat);
-extern void ezrb_destroy(ezrb_t *cb);
+ezrb_t *ezrb_create(uint8_t len);
+rb_sta_t ezrb_push(ezrb_t *cb,RB_DATA_T dat);
+rb_sta_t ezrb_pop(ezrb_t *cb,RB_DATA_T *dat);
+void ezrb_destroy(ezrb_t *cb);
 
 /* Ez String */
 #define EZSTR_OK 0
@@ -221,14 +241,14 @@ extern void ezrb_destroy(ezrb_t *cb);
 #define ezstr_ret_t char
 #define ezstr_size_t int
 
-extern ezstr_ret_t estrcat_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
-extern ezstr_ret_t estrcatc_s(char *_Dst, ezstr_size_t _DstSize, char _Src);
-extern ezstr_ret_t estrcpy_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
-extern ezstr_ret_t estrlen_s(const char *_Str,ezstr_size_t _Size);
-extern ezstr_size_t estrlen(const char *_Str);
-extern ezstr_ret_t estrcmp(const char* _Str1,const char* _Str2);
-extern ezstr_ret_t estrncmp(const char *_Str1, const char *_Str2, ezstr_size_t _Size);
-extern char* estrtokc(char *_Str, char _Deli);
+ezstr_ret_t estrcat_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
+ezstr_ret_t estrcatc_s(char *_Dst, ezstr_size_t _DstSize, char _Src);
+ezstr_ret_t estrcpy_s(char *_Dst, ezstr_size_t _DstSize, const char *_Src);
+ezstr_ret_t estrlen_s(const char *_Str,ezstr_size_t _Size);
+ezstr_size_t estrlen(const char *_Str);
+ezstr_ret_t estrcmp(const char* _Str1,const char* _Str2);
+ezstr_ret_t estrncmp(const char *_Str1, const char *_Str2, ezstr_size_t _Size);
+char* estrtokc(char *_Str, char _Deli);
 
 
 

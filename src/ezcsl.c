@@ -57,8 +57,8 @@ static struct EzCslHandleStruct {
     modem_rev_func_t (*modem_cb)(modem_file_t *); // filename,filesize,buf,buflen
 #endif
 
-    /* su */
-    const char *su_psw;
+    /* root */
+    const char *root_psw;
     uint8_t su_checked;
     uint8_t psw_inputing;
 
@@ -170,9 +170,9 @@ void ezport_receive_a_char(char c)
  *
  * @param prefix prefix of shell
  * @param welcome
- * @param su_psw password of su, NULL = no su
+ * @param root_psw password of root, NULL = no root
  */
-void ezcsl_init(const char *prefix, const char *welcome, const char *su_psw)
+void ezcsl_init(const char *prefix, const char *welcome, const char *root_psw)
 {
     ezport_custom_init();
 
@@ -192,7 +192,7 @@ void ezcsl_init(const char *prefix, const char *welcome, const char *su_psw)
         ezhdl.hist_buf[i] = 0;
     }
 
-    ezhdl.su_psw = su_psw;
+    ezhdl.root_psw = root_psw;
     ezhdl.psw_inputing = 0;
     ezhdl.su_checked = 0;
 
@@ -359,7 +359,7 @@ uint8_t ezcsl_tick(void)
                     buf_to_history();
                     ezcsl_submit();
                 } else {
-                    if (estrcmp(ezhdl.su_psw,ezhdl.buf) == 0) {
+                    if (estrcmp(ezhdl.root_psw,ezhdl.buf) == 0) {
                         /* password success */
                         ezhdl.su_checked = 1;
                         ezhdl.psw_inputing = 0;
@@ -493,8 +493,8 @@ static void ezcsl_submit(void)
     while (cmd_p != NULL) {
         if (estrcmp(cmd_p->unit->title_main, maintitle) == 0) {
             match_ok_flag = 1;
-            if (cmd_p->unit->need_su && !ezhdl.su_checked && ezhdl.su_psw != NULL) {
-                /* query su password */
+            if (cmd_p->unit->need_root && !ezhdl.su_checked && ezhdl.root_psw != NULL) {
+                /* query root password */
                 ezcsl_reset_empty();
                 ezcsl_printf(TIP_PSW_INPUT);
                 ezhdl.psw_inputing = 1;
@@ -642,11 +642,11 @@ static void ezcsl_tabcomplete(void)
  * 
  * @param title_main 
  * @param describe 
- * @param need_su EZ_NSUDO or EZ_SUDO
+ * @param need_root EZ_NSUDO or EZ_SUDO
  * @param callback 
  * @return ez_cmd_unit_t* 
  */
-ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describe, uint8_t need_su, void (*callback)(uint16_t, ez_param_t *))
+ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describe, uint8_t need_root, void (*callback)(uint16_t, ez_param_t *))
 {
     if (estrlen(title_main) == 0 || estrlen(title_main) >= 10 || callback == NULL) {
         return NULL;
@@ -665,7 +665,7 @@ ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describ
     p_add->next = NULL;
     p_add->title_main = title_main;
     p_add->callback = callback;
-    p_add->need_su = need_su;
+    p_add->need_root = need_root;
 
     if (cmd_unit_head == NULL) {
         cmd_unit_head = p_add;
@@ -737,7 +737,7 @@ uint8_t ezcsl_break_signal(void){
  * @brief 
  * 
  */
-void ezcsl_is_su(void){
+uint8_t ezcsl_is_su(void){
     return ezhdl.su_checked;
 }
 

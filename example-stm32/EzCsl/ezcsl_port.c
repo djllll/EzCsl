@@ -2,18 +2,7 @@
 
 /* your include begin */
 #include "main.h"
-extern UART_HandleTypeDef hlpuart1;
 /* your include end */
-
-void ezport_custom_init(void);
-void ezport_custom_deinit(void);
-void ezport_send_str(char *str, uint16_t len);
-void ezport_delay(uint16_t ms);
-void ezport_rtos_mutex_lock(void);
-void ezport_rtos_mutex_unlock(void);
-
-
-
 
 /**
  * use this to send

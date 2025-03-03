@@ -17,24 +17,23 @@ extern "C" {
 #define EZ_YMODEM_1K   0x01
 
 
-/* Ez Type ,Porting ******************/
-#include "main.h"
-// typedef unsigned int uint32_t;
-// typedef unsigned short uint16_t;
-// typedef unsigned char uint8_t;
+/* Ez Type Port ******************/
+typedef unsigned int uint32_t;
+typedef unsigned short uint16_t;
+typedef unsigned char uint8_t;
 
 
 /* Ez Function ,Donnot Modify */
-extern void ezport_send_str(char *str, uint16_t len);
-extern void ezport_delay(uint16_t ms);
-extern void ezport_receive_a_char(char c);
-extern void ezport_rtos_mutex_lock(void);
-extern void ezport_rtos_mutex_unlock(void);
-extern void ezport_custom_init(void);
-extern void ezport_custom_deinit(void);
+void ezport_send_str(char *str, uint16_t len);
+void ezport_delay(uint16_t ms);
+void ezport_receive_a_char(char c);
+void ezport_rtos_mutex_lock(void);
+void ezport_rtos_mutex_unlock(void);
+void ezport_custom_init(void);
+void ezport_custom_deinit(void);
 
 
-/* Ez Configuration , Porting ******************/
+/* Ez Configuration Port ******************/
 #define CSL_BUF_LEN     50 // console buf len (include prefix)
 #define HISTORY_BUF_LEN 40 // history record
 #define PRINT_BUF_LEN   150
