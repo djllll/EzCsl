@@ -112,7 +112,7 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
 #if (LOG_DEFINE & LOG_LEVEL_E)
 #define EZ_LOGE(TAG, format, ...)                                                                 \
     do {                                                                                          \
-        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_RED("E[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_RED("E[%s] " format "\r\n"), TAG, ##__VA_ARGS__); \
         ezcsl_reset_prefix();                                                                     \
     } while (0)
 #else

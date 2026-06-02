@@ -1,6 +1,6 @@
 #include "ezcsl.h"
 #include "stdio.h"  // vsprintf
-#include "stdlib.h" // s_malloc
+#include "stdlib.h" // malloc
 
 
 #if USE_EZ_MODEM == EZ_YMODEM_1K
@@ -11,7 +11,7 @@
 #define IS_VISIBLE(c)   ((c) >= 0x20 && (c) <= 0x7e)
 #define IS_BACKSPACE(c) ((c) == 0x08 || (c) == 0x7f)
 #define IS_TAB(c)       ((c) == 0x09)
-#define IS_ENTER(c)     ((c) == 0x0d)
+#define IS_ENTER(c)     ((c) == 0x0d || (c) == 0x0a)
 #define IS_CTRL_C(c)    ((c) == 0x03)
 #define IS_CTRL_D(c)    ((c) == 0x04)
 
@@ -74,8 +74,6 @@ static ez_sta_t modem_start(void);
 static uint16_t crc16_modem(uint8_t *data, uint16_t length);
 static void modem_reply(uint8_t reply);
 #endif
-static void* s_malloc(uint16_t size);
-static void s_free(void *mem);
 static void ezcsl_reset_empty(void);
 static void ezcsl_tabcomplete(void);
 static void ezcsl_submit(void);
@@ -90,31 +88,6 @@ static ez_cmd_unit_t *cmd_unit_head = NULL;
 static void ezcsl_cmd_help_callback(uint16_t id, ez_param_t *para);
 
 
-
-/**
- * @brief 
- * 
- * @param size 
- * @return void* 
- */
-static void* s_malloc(uint16_t size){
-    ezport_rtos_mutex_lock();
-    void *p = malloc(size);
-    ezport_rtos_mutex_unlock();
-    return p;
-}
-
-
-/**
- * @brief 
- * 
- * @param mem 
- */
-static void s_free(void *mem){
-    ezport_rtos_mutex_lock();
-    free(mem);
-    ezport_rtos_mutex_unlock();
-}
 
 /**
  * @brief reset with prefix
@@ -215,18 +188,20 @@ void ezcsl_init(const char *prefix, const char *welcome, const char *root_psw)
  */
 void ezcsl_deinit(void)
 {
+    ezport_rtos_mutex_lock();
     ez_cmd_t *p1 = cmd_head;
     while (p1 != NULL) {
         ez_cmd_t *p_del = p1;
         p1 = p1->next;
-        s_free(p_del);
+        free(p_del);
     }
     ez_cmd_unit_t *p2 = cmd_unit_head;
     while (p2 != NULL) {
         ez_cmd_unit_t *p_del = p2;
         p2 = p2->next;
-        s_free(p_del);
+        free(p_del);
     }
+    ezport_rtos_mutex_unlock();
     ezrb_destroy(ezhdl.rb);
     ezport_custom_deinit();
 }
@@ -661,7 +636,7 @@ ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describ
         p = p->next;
     }
 
-    ez_cmd_unit_t *p_add = (ez_cmd_unit_t *)s_malloc(sizeof(ez_cmd_unit_t));
+    ez_cmd_unit_t *p_add = (ez_cmd_unit_t *)malloc(sizeof(ez_cmd_unit_t));
     p_add->describe = CHECK_NULL_STR(describe);
     p_add->next = NULL;
     p_add->title_main = title_main;
@@ -695,15 +670,17 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
     if (estrlen(para_desc) > PARA_LEN_MAX) {
         return EZ_ERR;
     }
+    ezport_rtos_mutex_lock();
     ez_cmd_t *p = cmd_head;
     while (p != NULL) { // duplicate
         if (estrcmp(p->unit->title_main, unit->title_main) == 0 && (estrcmp(p->title_sub, title_sub) == 0 || p->id == id)) {
+            ezport_rtos_mutex_unlock();
             return EZ_ERR;
         }
         p = p->next;
     }
 
-    ez_cmd_t *p_add = (ez_cmd_t *)s_malloc(sizeof(ez_cmd_t));
+    ez_cmd_t *p_add = (ez_cmd_t *)malloc(sizeof(ez_cmd_t));
     p_add->describe = CHECK_NULL_STR(describe);
     p_add->next = NULL;
     p_add->title_sub = CHECK_NULL_STR(title_sub);
@@ -722,6 +699,7 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
         p->next = p_add;
     }
 
+    ezport_rtos_mutex_unlock();
     return EZ_OK;
 }
 
@@ -1043,21 +1021,25 @@ ezrb_t *ezrb_create(uint8_t len)
     if (len < 1) {
         return NULL;
     }
-    ezrb_t *rb = (ezrb_t *)s_malloc(sizeof(ezrb_t));
+    ezport_rtos_mutex_lock();
+    ezrb_t *rb = (ezrb_t *)malloc(sizeof(ezrb_t));
     if (rb == NULL) {
+        ezport_rtos_mutex_unlock();
         return NULL;
     }
     rb->head = 0;
     rb->tail = 0;
     rb->len = len;
-    rb->buffer = (RB_DATA_T *)s_malloc(sizeof(RB_DATA_T) * len);
+    rb->buffer = (RB_DATA_T *)malloc(sizeof(RB_DATA_T) * len);
     if (rb->buffer == NULL) {
+        ezport_rtos_mutex_unlock();
         ezrb_destroy(rb);
         return NULL;
     }
     for (uint16_t i = 0; i < len; i++) {
         rb->buffer[i] = 0;
     }
+    ezport_rtos_mutex_unlock();
     return rb;
 }
 
@@ -1102,14 +1084,16 @@ rb_sta_t ezrb_pop(ezrb_t *rb, RB_DATA_T *rev)
 
 void ezrb_destroy(ezrb_t *rb)
 {
+    ezport_rtos_mutex_lock();
     if (rb->buffer != NULL) {
-        s_free(rb->buffer);
+        free(rb->buffer);
         rb->buffer = NULL;
     }
     if (rb != NULL) {
-        s_free(rb);
+        free(rb);
         rb = NULL;
     }
+    ezport_rtos_mutex_unlock();
 }
 
 
