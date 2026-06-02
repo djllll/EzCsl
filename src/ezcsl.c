@@ -651,10 +651,11 @@ ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describ
     if (estrlen(title_main) == 0 || estrlen(title_main) >= 10 || callback == NULL) {
         return NULL;
     }
-
+    ezport_rtos_mutex_lock();
     ez_cmd_unit_t *p = cmd_unit_head;
     while (p != NULL) { // duplicate
         if (estrcmp(p->title_main, title_main) == 0) {
+            ezport_rtos_mutex_unlock();
             return NULL;
         }
         p = p->next;
@@ -677,6 +678,7 @@ ez_cmd_unit_t *ezcsl_cmd_unit_create(const char *title_main, const char *describ
         p->next = p_add;
     }
 
+    ezport_rtos_mutex_unlock();
     return p_add;
 }
 

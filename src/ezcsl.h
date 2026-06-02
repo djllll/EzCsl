@@ -110,10 +110,10 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
 
 
 #if (LOG_DEFINE & LOG_LEVEL_E)
-#define EZ_LOGE(TAG, format, ...)                                                                \
-    do {                                                                                         \
+#define EZ_LOGE(TAG, format, ...)                                                                 \
+    do {                                                                                          \
         ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_RED("E[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
-        ezcsl_reset_prefix();                                                                    \
+        ezcsl_reset_prefix();                                                                     \
     } while (0)
 #else
 #define EZ_LOGE(TAG, format, ...) \
@@ -124,10 +124,10 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
 
 
 #if (LOG_DEFINE & LOG_LEVEL_I)
-#define EZ_LOGI(TAG, format, ...)                                                                  \
-    do {                                                                                           \
-        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_GREEN("I[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
-        ezcsl_reset_prefix();                                                                      \
+#define EZ_LOGI(TAG, format, ...)                                                                   \
+    do {                                                                                            \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_GREEN("I[%s] " format "\r\n"), TAG, ##__VA_ARGS__); \
+        ezcsl_reset_prefix();                                                                       \
     } while (0)
 #else
 #define EZ_LOGI(TAG, format, ...) \
@@ -138,10 +138,10 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
 
 
 #if (LOG_DEFINE & LOG_LEVEL_D)
-#define EZ_LOGD(TAG, format, ...)                                                                 \
-    do {                                                                                          \
-        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_BLUE("D[" TAG "] " format "\r\n"), ##__VA_ARGS__); \
-        ezcsl_reset_prefix();                                                                     \
+#define EZ_LOGD(TAG, format, ...)                                                                  \
+    do {                                                                                           \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) COLOR_L_BLUE("D[%s] " format "\r\n"), TAG, ##__VA_ARGS__); \
+        ezcsl_reset_prefix();                                                                      \
     } while (0)
 #else
 #define EZ_LOGD(TAG, format, ...) \
@@ -151,10 +151,10 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
 #endif
 
 #if (LOG_DEFINE & LOG_LEVEL_V)
-#define EZ_LOGV(TAG, format, ...)                                                   \
-    do {                                                                            \
-        ezcsl_printf(MOVE_CURSOR_ABS(0) "V[" TAG "] " format "\r\n", ##__VA_ARGS__); \
-        ezcsl_reset_prefix();                                                       \
+#define EZ_LOGV(TAG, format, ...)                                                    \
+    do {                                                                             \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) "V[%s] " format "\r\n", TAG, ##__VA_ARGS__); \
+        ezcsl_reset_prefix();                                                        \
     } while (0)
 #else
 #define EZ_LOGV(TAG, format, ...) \
@@ -164,14 +164,14 @@ ez_sta_t ezcsl_cmd_register(ez_cmd_unit_t *unit, uint16_t id, const char *title_
 #endif
 
 #if (LOG_DEFINE & LOG_LEVEL_PRT)
-#define EZ_PRTL(format, ...)                  \
-    do {                                     \
-        ezcsl_printf(MOVE_CURSOR_ABS(0)format"\r\n", ##__VA_ARGS__); \
+#define EZ_PRTL(format, ...)                                           \
+    do {                                                               \
+        ezcsl_printf(MOVE_CURSOR_ABS(0) format "\r\n", ##__VA_ARGS__); \
     } while (0)
 #else
 #define EZ_PRTL(format, ...) \
-    {                       \
-        ;                   \
+    {                        \
+        ;                    \
     }
 #endif
 
